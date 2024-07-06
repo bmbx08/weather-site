@@ -1,0 +1,41 @@
+body{
+    background: url(./images/background.jpg);
+    background-repeat: no-repeat;
+    background-size: cover;
+    height: 100vh;
+}
+
+.container{
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+}
+
+.weather-box{
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    flex-direction: column;
+    width: 600px;
+    height: 250px;
+    background-color: azure;
+    border-radius: 25px;
+    border: 3px solid white;
+    margin-bottom: 1em;
+}
+
+.button-box{
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    background-color: black;
+    width: 600px;
+    height: 100px;
+    border-radius: 50px;
+}
+
+.button-style{
+    margin: 0 1em;
+}
