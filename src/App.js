@@ -5,6 +5,7 @@ import WeatherBox from "./component/WeatherBox";
 import WeatherButton from "./component/WeatherButton";
 import ClipLoader from "react-spinners/ClipLoader";
 
+const cities = ["New York", "France", "Osaka", "Paris"];
 const API_KEY = "6320e21052b10fe9eaa63c37ff048228";
 let lang = "kr"; //en for english
 
@@ -17,11 +18,9 @@ let lang = "kr"; //en for english
 
 function App() {
   const [weather, setWeather] = useState(null);
-  const [city, setCity] = useState("");
+  const [city, setCity] = useState(null);
   const [loading, setLoading] = useState(false);
-  // const[errorExists,setErrorExists]=useState(false);
-  // const[errorMessage,setErrorMessage]=useState("");
-  const cities = ["New York", "France", "Osaka", "Paris"];
+  const [errorMessage, setErrorMessage] = useState("");
 
   const getCurrentLocation = async () => {
     navigator.geolocation.getCurrentPosition((position) => {
@@ -33,40 +32,52 @@ function App() {
   };
 
   const getWeatherByCurrentLocation = async (lat, lon) => {
-    let url = new URL(
-      `https://api.openweathermap.org/data/2.5/weather?lat=${lat}&lon=${lon}&appid=${API_KEY}&lang=${lang}&units=metric`
-    );
-    setLoading(true);
-    const response = await fetch(url);
-    const data = await response.json();
-    setWeather(data);
-    setLoading(false);
+    try {
+      let url = new URL(
+        `https://api.openweathermap.org/data/2.5/weather?lat=${lat}&lon=${lon}&appid=${API_KEY}&lang=${lang}&units=metric`
+      );
+      const response = await fetch(url);
+      const data = await response.json();
+
+      setWeather(data);
+      setLoading(false);
+    } catch (error) {
+      console.log("error message",error);
+      setErrorMessage(error.message);
+      setLoading(false);
+    }
   };
 
   const getWeatherByCity = async () => {
-    try{
+    try {
       let url = `https://api.openweathermap.org/data/2.5/weather?q=${city}&appid=${API_KEY}&lang=${lang}&units=metric`;
-    setLoading(true);
-    let response = await fetch(url);
-    console.log("response",response);
-    let data = await response.json();
-    console.log("data", data);
-    if (response.status===200){
-    setWeather(data);
-    setLoading(false);
-    } else{
-      throw new Error(data.message);
-    }} catch(error){
+      let response = await fetch(url);
+      let data = await response.json();
+      console.log("data", data);
+
+      setWeather(data);
+      setLoading(false);
+    } catch (error) {
       console.log("error message", error);
+      setErrorMessage(error.message);
+      setLoading(false);
     }
-    
-    
+  };
+
+  const handleCityChange = (city) => {
+    if (city == "current") {
+      setCity(null);
+    } else {
+      setCity(city);
+    }
   };
 
   useEffect(() => {
-    if (city == "") {
+    if (city === null) {
+      setLoading(true);
       getCurrentLocation();
     } else {
+      setLoading(true);
       getWeatherByCity(); //city state가 바뀐 뒤에 함수를 호출해야 되므로 useEffect안에 넣는다.
     }
   }, [city]);
@@ -83,20 +94,24 @@ function App() {
             data-testid="loader"
           />
         </div>
-      ) : (
+      ) : !errorMessage ? (
         <div className="container">
           <WeatherBox weather={weather} />
-          <WeatherButton cities={cities} setCity={setCity} getLocation={getCurrentLocation} />
+          <WeatherButton
+            cities={cities}
+            handleCityChange={handleCityChange}
+            selectedCity={city}
+            getLocation={getCurrentLocation}
+          />
         </div>
+      ) : (
+        errorMessage
       )}
     </div>
   );
 }
 
-//
-
 export default App;
-
 
 //꾸미기 ideas
 //장소들 카드로 만들고 누르면 밑에 박스에 날씨 정보 보여주기
